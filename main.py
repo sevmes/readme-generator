@@ -11,7 +11,7 @@ if len(sys.argv) < 3:
 # Project and location settings for Vertex AI
 PROJECT_ID = sys.argv[1]
 LOCATION = sys.argv[2]
-MODEL_NAME = "gemini-pro-experimental"
+MODEL_NAME = "gemini-1.5-pro-002"
 
 # Configuration for text generation
 GENERATION_CONFIG = {
