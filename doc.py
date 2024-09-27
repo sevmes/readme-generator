@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
@@ -10,7 +11,7 @@ MODEL_NAME = "gemini-pro-experimental"
 # Configuration for text generation
 GENERATION_CONFIG = {
     "max_output_tokens": 8192,
-    "temperature": 0.2,
+    "temperature": 0,
     "top_p": 0.95,
 }
 
@@ -55,7 +56,7 @@ def get_code_file_extensions(directory):
 def read_code_files(directory, allowed_extensions):
     """Reads code files from the specified directory, excluding specified subdirectories."""
 
-    code_files = []
+    code_files = {}
     for root, _, filenames in os.walk(directory):
         # Load .gitignore for the current directory and its parents
         gitignore_entries = []
@@ -85,11 +86,10 @@ def read_code_files(directory, allowed_extensions):
             try:
                 with open(filepath, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    code_files.append(f"File path : {filepath}\n```\n{content}\n```")
+                    code_files[os.path.relpath(filepath)] = [content]
             except Exception as e:
                 print(f"Error reading file {filepath}: {e}")
     return code_files
-
 
 
 def send_message(chat, message, print_response=True):
@@ -111,17 +111,24 @@ def analyze_codebase(files):
     initial_prompt = """
     Here is a code repository. Just respond "OK".
     Code files :
-    """ + "".join(files)
+    """ + "".join([f"{filename} : \n{content}\n" for filename, content in files.items()])
 
+    list_of_paths = "\n".join(files.keys())
 
+    list_of_paths_prompt = f"""
+        Here is the list of files in the project :
+        {list_of_paths}
+        Just respond with "OK".
+    """
+    
     send_message(chat, initial_prompt)
-    send_message(chat, "Give the full project structure.")
+    send_message(chat, list_of_paths_prompt)
     send_message(chat, """
-        Now write a description in two part of approximately the same length.
-        The first part is focuses on the purpose of the project. Be specific and get into the details, but keep it business oriented and not technical.
+        Now write a description in two part of approximately the same length. It is a internal description that will help other internal developers understand the project.
+        Focus on objective points and description instead of subjective thoughts such as why the project is well-written.
+        The first part focuses on the purpose of the project, and should be business oriented. Be specific and get into the details of the business logic.
         The second part focuses on how the project works internally.
-        This is a internal description that will help other developers understand the project. It is not meant to advertise
-        how good and how cool it is. It's about having the details of what it is and how it works. Write it in french.
+        Write your answer in french.
     """)
 
     while True:
