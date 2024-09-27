@@ -2,10 +2,15 @@
 import os
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting
+import sys
+
+if len(sys.argv) < 3:
+    print("Usage: python main.py <PROJECT_ID> <LOCATION>")
+    sys.exit(1)
 
 # Project and location settings for Vertex AI
-PROJECT_ID = "morini-733-20240208103453"
-LOCATION = "us-central1"
+PROJECT_ID = sys.argv[1]
+LOCATION = sys.argv[2]
 MODEL_NAME = "gemini-pro-experimental"
 
 # Configuration for text generation
@@ -138,11 +143,6 @@ def analyze_codebase(files):
         send_message(chat, user_input)
 
     chat.end_chat()
-
-    with open("response.txt", "w") as f:
-        f.write(chat.last_response.text)
-
-    print(chat.last_response.text)
 
 
 if __name__ == "__main__":
