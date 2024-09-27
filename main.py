@@ -142,14 +142,6 @@ def analyze_codebase(files):
     with open("generated-README.md", "w+") as f:
         f.write(generated_readme)
 
-    # while True:
-    #     user_input = input("Enter a new prompt (or 'exit' to quit): ")
-    #     if user_input.lower() == "exit":
-    #         break
-    #     send_message(chat, user_input)
-
-    chat.end_chat()
-
 
 if __name__ == "__main__":
     current_directory = os.getcwd()
