@@ -99,11 +99,14 @@ def read_code_files(directory, allowed_extensions):
 
 def send_message(chat, message, print_response=True):
     """Sends a message to the Gemini chat session with specified settings"""
+    full_response = ""
     for response in chat._send_message_streaming(message, generation_config=GENERATION_CONFIG, safety_settings=SAFETY_SETTINGS):
+        full_response += response.text
         if print_response:
             print(response.text, end="")
     if print_response:
         print("\n\n---------------\n\n")
+    return full_response
 
 
 def analyze_codebase(files):
@@ -128,7 +131,7 @@ def analyze_codebase(files):
     
     send_message(chat, initial_prompt)
     send_message(chat, list_of_paths_prompt)
-    send_message(chat, """
+    generated_readme = send_message(chat, """
         Now write a description in two part of approximately the same length. It is a internal description that will help other internal developers understand the project.
         Focus on objective points and description instead of subjective thoughts such as why the project is well-written.
         The first part focuses on the purpose of the project, and should be business oriented. Be specific and get into the details of the business logic.
@@ -136,11 +139,14 @@ def analyze_codebase(files):
         Write your answer in french.
     """)
 
-    while True:
-        user_input = input("Enter a new prompt (or 'exit' to quit): ")
-        if user_input.lower() == "exit":
-            break
-        send_message(chat, user_input)
+    with open("generated-README.md", "w+") as f:
+        f.write(generated_readme)
+
+    # while True:
+    #     user_input = input("Enter a new prompt (or 'exit' to quit): ")
+    #     if user_input.lower() == "exit":
+    #         break
+    #     send_message(chat, user_input)
 
     chat.end_chat()
 
