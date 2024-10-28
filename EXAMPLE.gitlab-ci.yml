@@ -1,0 +1,14 @@
+image: python:latest
+
+stages:
+  - generate
+
+generate-readme:
+  stage: generate
+  script:
+    - git clone https://github.com/sevmes/readme-generator.git /tmp/readme-generator
+    - pip install -r /tmp/readme-generator/requirements.txt
+    - python /tmp/readme-generator/main.py $GCP_PROJECT_NAME europe-west1
+  artifacts:
+    paths:
+      - generated-README.md
